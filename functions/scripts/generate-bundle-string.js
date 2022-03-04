@@ -2,12 +2,13 @@ const fs = require("fs");
 const path = require("path");
 
 const main = async () => {
-  const destinationFilePath = path.join(__dirname, "..", "dst.html");
+  // const destinationFilePath = path.join(__dirname, "..", "dst.html");
+  const destinationFilePath = path.join(__dirname, "..", "dst.js");
   try {
     const bundleBuff = fs.readFileSync(path.join(__dirname, "..", "bundle.js"));
     const opencvBuff = fs.readFileSync(path.join(__dirname, "..", "opencv.js"));
 
-    const htmlString = `
+    const htmlString = JSON.stringify(`
     <!DOCTYPE html>
     <html>
       <head>
@@ -24,9 +25,12 @@ const main = async () => {
       <body>
       </body>
     </html>
+    `);
+    const jsString = `
+    export const htmlString = ${htmlString}
     `;
-
-    fs.writeFileSync(destinationFilePath, htmlString);
+    fs.writeFileSync(destinationFilePath, jsString);
+    // fs.writeFileSync(destinationFilePath, htmlString);
   } catch (error) {
     console.log(error);
   }

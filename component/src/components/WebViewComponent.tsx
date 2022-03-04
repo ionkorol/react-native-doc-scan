@@ -1,14 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import WebView from "react-native-webview";
-import { InboundMessage, OutboundMessage, Points } from "../types/types";
+import { InboundMessage, OutboundMessage } from "../types/types";
 import * as FileSystem from "expo-file-system";
 import { handleFindCorners, handleGrayScale, handlePerspectiveCrop, onFindCorners, onGrayScale, onPerspectiveCrop } from "../lib/observables";
-import { downloadFiles } from "../lib/DownloadFiles";
 
 export const WebViewComponent: React.FC = () => {
-  const [isWebViewReady, _setIsWebViewReady] = useState(false);
-  const [isFunctionLoading, _setIsFunctionLoading] = useState(false);
-  const [uri, _setUri] = useState<string | undefined>(undefined);
   const webViewRef = useRef<WebView>(null);
 
   const sendMessage = (message: OutboundMessage): void => {
@@ -66,14 +62,11 @@ export const WebViewComponent: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    downloadFiles().then(_setUri);
-  }, []);
+  console.log();
 
   return (
     <WebView
       ref={webViewRef}
-      onLoadEnd={() => _setIsWebViewReady(true)}
       allowFileAccessFromFileURLs
       allowingReadAccessToURL={FileSystem.documentDirectory || undefined}
       originWhitelist={["*"]}
@@ -83,7 +76,7 @@ export const WebViewComponent: React.FC = () => {
       domStorageEnabled
       allowFileAccess
       source={{
-        uri: "http://10.13.102.234:5555/dst.html",
+        html: require("../dst.js").htmlString,
       }}
       onMessage={(event) => {
         handleInboundMessage(event.nativeEvent.data);
