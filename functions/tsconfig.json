@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    // "typeRoots": ["src/global.d.ts"],
+    "lib": ["ES2015", "DOM"],
+    "outDir": "dist",
+    "allowJs": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/index.ts"]
+}
