@@ -1,9 +1,7 @@
 import { Button, SafeAreaView, StyleSheet, StatusBar, View } from "react-native";
 import React from "react";
 import * as ImagePicker from "expo-image-picker";
-import { ImageManipulation } from "./src/rnDocScan";
-import { onEditImage } from "./src/rnDocScan/lib/observables";
-import { WebViewComponent } from "./src/rnDocScan/components";
+import { DocScanComponent, editImage } from "@korol/rn-doc-scan";
 
 export default function App() {
   const pickImage = async () => {
@@ -12,7 +10,9 @@ export default function App() {
       quality: 0.5,
     });
     if (!res.cancelled) {
-      onEditImage.next({ base64: "data:image/jpeg;base64," + res.base64, size: { width: res.width, height: res.height } });
+      console.log("test1");
+      const data = await editImage({ base64: "data:image/jpeg;base64," + res.base64, size: { width: res.width, height: res.height } });
+      console.log("test2");
     }
   };
 
@@ -29,10 +29,9 @@ export default function App() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "pink", position: "relative" }}>
       <StatusBar backgroundColor="pink" />
-      <ImageManipulation />
+      <DocScanComponent />
       <Button title="Pick Image" onPress={pickImage} />
       {/* <Button title="Take Pic" onPress={takePicture} /> */}
-      <WebViewComponent />
     </SafeAreaView>
   );
 }

@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "@korol/rn-doc-scan": {
+      "signature": "f073bcfb00cb9088dc64ea5f90f5ad29",
+      "file": true
+    }
+  }
+}
