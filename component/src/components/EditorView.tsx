@@ -1,47 +1,26 @@
-import React from "react";
-import { ImageBackground, StyleSheet } from "react-native";
+import React, { useContext } from "react";
+import { ImageBackground } from "react-native";
+import { EDITOR_VIEW_GAP } from "../constants/dimensions";
+import { MainContext } from "../contexts/MainContext";
 import { CropArea } from "./CropArea";
 import { LoadingComponent } from "./LoadingComponent";
-import { cropViewDims } from "../lib/observables";
-import { useImageManipulation } from "../hooks/useImageManipulation";
 
 export const EditorView = () => {
-  const { imageData } = useImageManipulation();
+  /* ******************** Hooks ******************** */
+  const { modifiedImage, isLoading } = useContext(MainContext);
 
-  if (!Boolean(imageData.base64)) {
+  /* ******************** Variables ******************** */
+  const imgExists = !!modifiedImage;
+
+  /* ******************** JSX ******************** */
+  if (!imgExists) {
     return <LoadingComponent isLoading={true} />;
   }
 
   return (
-    <ImageBackground
-      source={{ uri: imageData.base64 }}
-      style={{ flex: 1, marginVertical: 40, marginHorizontal: 20 }}
-      onLayout={(e) => {
-        const { width, height } = e.nativeEvent.layout;
-        cropViewDims.next({ width, height });
-      }}
-      resizeMode="stretch"
-    >
+    <ImageBackground source={{ uri: modifiedImage.base64 }} style={{ flex: 1, margin: EDITOR_VIEW_GAP }} resizeMode="stretch">
       <CropArea />
+      <LoadingComponent isLoading={isLoading} />
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    top: 0,
-    zIndex: 5,
-    elevation: 5,
-  },
-  overlay: {
-    position: "relative",
-    flex: 1,
-    backgroundColor: "black",
-    zIndex: 100,
-    elevation: 100,
-  },
-  button: {
-    backgroundColor: "transparent",
-  },
-});

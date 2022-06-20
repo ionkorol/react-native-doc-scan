@@ -1,55 +1,47 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { GestureResponderEvent } from "react-native";
+import React, { useContext } from "react";
+import { GestureResponderEvent, StatusBar } from "react-native";
 import Svg, { Circle, Polygon } from "react-native-svg";
-import { useImageManipulation } from "../hooks/useImageManipulation";
-import { handleFindCorners, cropViewDims, cropPointsObservable } from "../lib/observables";
+import { CONTROLS_BAR_HEIGHT, EDITOR_VIEW_GAP } from "../constants/dimensions";
+import { ManipulationStage } from "../constants/enums";
+import { MainContext } from "../contexts/MainContext";
 
 export const CropArea: React.FC = () => {
-  const { imageData, cropPoints, manipulationStage } = useImageManipulation();
-  const [viewDims, _setViewDims] = useState({ width: 1, height: 1 });
-  const firstRender = useRef(true);
-  const isVisible = manipulationStage === "crop";
+  /* ******************** Hooks ******************** */
+  const { cropPoints, manipulationStage, _setCropPoints, cropViewDims } = useContext(MainContext);
 
-  const widthRatio = useMemo(() => {
-    if (imageData) {
-      return imageData.size.width / viewDims.width;
-    }
-    return 1;
-  }, [imageData, viewDims]);
+  /* ******************** Variables ******************** */
+  const isVisible = manipulationStage === ManipulationStage.CROP;
 
-  const heightRatio = useMemo(() => {
-    if (imageData) {
-      return imageData.size.height / viewDims.height;
-    }
-    return 1;
-  }, [imageData, viewDims]);
-
-  useEffect(() => {
-    if (firstRender.current && imageData.base64) {
-      handleFindCorners.next(imageData.base64);
-      firstRender.current = false;
-    }
-  }, [imageData]);
-
-  useEffect(() => {
-    const viewDimsSubscription = cropViewDims.asObservable().subscribe(_setViewDims);
-    return () => viewDimsSubscription.unsubscribe();
-  }, []);
-
+  /* ******************** Functions ******************** */
   const handleOnTouch = (pointType: "topLeft" | "topRight" | "bottomRight" | "bottomLeft") => (event: GestureResponderEvent) => {
     const x = event.nativeEvent.locationX;
     const y = event.nativeEvent.locationY;
-    cropPointsObservable.next({ ...cropPoints, [pointType]: { x: x * widthRatio, y: y * heightRatio } });
+    const { pageX, pageY } = event.nativeEvent;
+
+    if (
+      pageX <= EDITOR_VIEW_GAP ||
+      pageX >= cropViewDims.width + EDITOR_VIEW_GAP ||
+      pageY <= EDITOR_VIEW_GAP + CONTROLS_BAR_HEIGHT ||
+      pageY >= cropViewDims.height + EDITOR_VIEW_GAP
+    ) {
+      return;
+    }
+    _setCropPoints((prevState) => (prevState ? { ...prevState, [pointType]: { x, y } } : prevState));
   };
 
+  /* ******************** JSX ******************** */
+  if (!cropPoints) {
+    return <></>;
+  }
+
   return (
-    <Svg style={{ display: isVisible ? "flex" : "none" }} height={viewDims.height * heightRatio} width={viewDims.width * widthRatio}>
+    <Svg style={{ display: isVisible ? "flex" : "none" }} height={cropViewDims.height} width={cropViewDims.width}>
       <Polygon
         points={`
-        ${cropPoints.topLeft.x / widthRatio},${cropPoints.topLeft.y / heightRatio} 
-        ${cropPoints.topRight.x / widthRatio},${cropPoints.topRight.y / heightRatio} 
-        ${cropPoints.bottomRight.x / widthRatio},${cropPoints.bottomRight.y / heightRatio} 
-        ${cropPoints.bottomLeft.x / widthRatio},${cropPoints.bottomLeft.y / heightRatio}
+        ${cropPoints.topLeft.x},${cropPoints.topLeft.y} 
+        ${cropPoints.topRight.x},${cropPoints.topRight.y} 
+        ${cropPoints.bottomRight.x},${cropPoints.bottomRight.y} 
+        ${cropPoints.bottomLeft.x},${cropPoints.bottomLeft.y}
         `}
         stroke="lightblue"
         fill="lightblue"
@@ -58,8 +50,8 @@ export const CropArea: React.FC = () => {
       />
       <Circle
         pointerEvents="box-only"
-        cx={cropPoints.topLeft.x / widthRatio}
-        cy={cropPoints.topLeft.y / heightRatio}
+        cx={cropPoints.topLeft.x}
+        cy={cropPoints.topLeft.y}
         r="10"
         fill="lightblue"
         onStartShouldSetResponder={() => true}
@@ -67,8 +59,8 @@ export const CropArea: React.FC = () => {
         onResponderMove={handleOnTouch("topLeft")}
       />
       <Circle
-        cx={cropPoints.topRight.x / widthRatio}
-        cy={cropPoints.topRight.y / heightRatio}
+        cx={cropPoints.topRight.x}
+        cy={cropPoints.topRight.y}
         r="10"
         fill="lightblue"
         onStartShouldSetResponder={() => true}
@@ -76,8 +68,8 @@ export const CropArea: React.FC = () => {
         onResponderMove={handleOnTouch("topRight")}
       />
       <Circle
-        cx={cropPoints.bottomRight.x / widthRatio}
-        cy={cropPoints.bottomRight.y / heightRatio}
+        cx={cropPoints.bottomRight.x}
+        cy={cropPoints.bottomRight.y}
         r="10"
         fill="lightblue"
         onStartShouldSetResponder={() => true}
@@ -85,8 +77,8 @@ export const CropArea: React.FC = () => {
         onResponderMove={handleOnTouch("bottomRight")}
       />
       <Circle
-        cx={cropPoints.bottomLeft.x / widthRatio}
-        cy={cropPoints.bottomLeft.y / heightRatio}
+        cx={cropPoints.bottomLeft.x}
+        cy={cropPoints.bottomLeft.y}
         r="10"
         fill="lightblue"
         onStartShouldSetResponder={() => true}

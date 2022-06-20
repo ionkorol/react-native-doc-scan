@@ -1,11 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  TouchableOpacityProps,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, TouchableOpacityProps } from "react-native";
 
 interface Props extends TouchableOpacityProps {
   icon?: string;
@@ -14,9 +9,7 @@ interface Props extends TouchableOpacityProps {
 export const Button: React.FC<Props> = ({ children, icon, ...rest }) => {
   return (
     <TouchableOpacity {...rest} style={styles.container}>
-      {icon && (
-        <MaterialCommunityIcons name={icon as any} style={styles.icon} />
-      )}
+      {icon && <MaterialCommunityIcons name={icon as any} style={styles.icon} />}
       <Text style={styles.text}>{children}</Text>
     </TouchableOpacity>
   );
@@ -32,6 +25,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "white",
+    textTransform: "uppercase",
   },
   icon: {
     marginRight: 5,

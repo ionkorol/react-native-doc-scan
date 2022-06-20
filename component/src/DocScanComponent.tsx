@@ -1,22 +1,25 @@
-import React from "react";
-import { Modal } from "react-native";
-import { BottomControls, TopControls, WebViewComponent } from "./components";
+import React, { useContext } from "react";
+import { Modal, View } from "react-native";
+import { BottomControls, TopControls } from "./components";
 import { EditorView } from "./components/EditorView";
-import { useImageManipulation } from "./hooks/useImageManipulation";
-import { useObservableLogic } from "./hooks/useObservableLogic";
+import { MainContext } from "./contexts/MainContext";
 
 export const DocScanComponent = () => {
-  const { imageData } = useImageManipulation();
-  useObservableLogic();
+  /* ******************** Hooks ******************** */
+  const { originalImage } = useContext(MainContext);
 
-  return (
-    <>
-      <WebViewComponent />
-      <Modal visible={Boolean(imageData.base64)} style={{ backgroundColor: "gray" }}>
+  /* ******************** Variables ******************** */
+  const isOpen = Boolean(originalImage);
+
+  /* ******************** JSX ******************** */
+  if (isOpen) {
+    return (
+      <View style={{ position: "absolute", bottom: 0, left: 0, height: "100%", width: "100%", backgroundColor: "gray", zIndex: 99, elevation: 99 }}>
         <TopControls />
         <EditorView />
         <BottomControls />
-      </Modal>
-    </>
-  );
+      </View>
+    );
+  }
+  return <></>;
 };

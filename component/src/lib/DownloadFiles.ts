@@ -1,8 +1,9 @@
 import * as FileSystem from "expo-file-system";
+import { FOLDER_NAME } from "../constants/files";
 
 export const downloadFiles = async () => {
-  const htmlLocation = FileSystem.documentDirectory + "rn-doc-scan/index.html";
-  const jsLocation = FileSystem.documentDirectory + "rn-doc-scan/bundle.js";
+  const htmlLocation = `${FileSystem.documentDirectory}${FOLDER_NAME}/index.html`;
+  const jsLocation = `${FileSystem.documentDirectory}${FOLDER_NAME}/bundle.js`;
   const opencvLocation = FileSystem.documentDirectory + "rn-doc-scan/opencv.js";
   const folderLocation = FileSystem.documentDirectory + "rn-doc-scan";
 

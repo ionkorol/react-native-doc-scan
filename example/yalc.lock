@@ -2,7 +2,7 @@
   "version": "v1",
   "packages": {
     "@korol/rn-doc-scan": {
-      "signature": "9ddd60a93ce9e0f18fe26d417156555a",
+      "signature": "9fcba2c2cc5f8ebf449ccd30c5cf5990",
       "file": true
     }
   }

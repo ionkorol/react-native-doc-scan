@@ -2,7 +2,6 @@ const fs = require("fs");
 const path = require("path");
 
 const main = async () => {
-  // const destinationFilePath = path.join(__dirname, "..", "dst.html");
   const destinationFilePath = path.join(__dirname, "..", "dst.js");
   try {
     const bundleBuff = fs.readFileSync(path.join(__dirname, "..", "bundle.js"));
@@ -30,7 +29,6 @@ const main = async () => {
     export const htmlString = ${htmlString}
     `;
     fs.writeFileSync(destinationFilePath, jsString);
-    // fs.writeFileSync(destinationFilePath, htmlString);
   } catch (error) {
     console.log(error);
   }
