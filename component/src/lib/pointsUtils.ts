@@ -1,7 +1,6 @@
 import { Points } from "../types";
 
 export const adjustPointsByRatios = (cropPoints: Points, widthRatio: number, heightRatio: number): Points => {
-  console.log(cropPoints);
   console.log(`Adjusting crop points by ratios height: ${heightRatio} width: ${widthRatio}`);
   return {
     topLeft: {

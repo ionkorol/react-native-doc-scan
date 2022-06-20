@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import WebView from "react-native-webview";
 import { FunctionName, ManipulationStage } from "../constants/enums";
 import { Points, InboundMessage, OutboundMessage, OriginalImage, ModifiedImage } from "../types";
@@ -17,7 +17,7 @@ export interface IMainContext {
   _handleDoneCommand: () => void;
   _setCropPoints: React.Dispatch<React.SetStateAction<Points | null>>;
   _setManipulationStage: React.Dispatch<React.SetStateAction<ManipulationStage>>;
-  originalImage: OriginalImage | null;
+  returnImage: string | null;
   modifiedImage: ModifiedImage | null;
   cropPoints: Points | null;
   manipulationStage: ManipulationStage;
@@ -36,7 +36,7 @@ export const MainContext = createContext<IMainContext>({
   _handleGrayScale: () => console.log("not implemented"),
   _setCropPoints: () => console.log("not implemented"),
   _setManipulationStage: () => console.log("not implemented"),
-  originalImage: null,
+  returnImage: null,
   modifiedImage: null,
   cropPoints: null,
   manipulationStage: ManipulationStage.CROP,
@@ -51,14 +51,11 @@ export const MainProvider: React.FC = ({ children }) => {
   /* ******************** Hooks ******************** */
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 
-  const [originalImage, _setOriginalImage] = useState<OriginalImage | null>(null);
+  const [returnImage, _setReturnImage] = useState<string | null>(null);
   const [modifiedImage, _setModifiedImage] = useState<ModifiedImage | null>(null);
   const [cropPoints, _setCropPoints] = useState<Points | null>(null);
   const [manipulationStage, _setManipulationStage] = useState<ManipulationStage>(ManipulationStage.VIEW);
-  const [cropViewDims, _setCropViewDims] = useState({
-    width: windowWidth - EDITOR_VIEW_GAP * 2,
-    height: windowHeight - CONTROLS_BAR_HEIGHT * 2 - EDITOR_VIEW_GAP * 2,
-  });
+  const [cropViewDims, _setCropViewDims] = useState({ width: 0, height: 0 });
   const [isLoading, _setIsLoading] = useState(false);
 
   const webViewRef = useRef<WebView>(null);
@@ -80,31 +77,41 @@ export const MainProvider: React.FC = ({ children }) => {
 
   /* ******************** Public Functions ******************** */
   const setImage = async (imgInfo: OriginalImage) => {
-    _setOriginalImage(imgInfo);
     const originalImageBase64 = await convertFromUriToBase64(imgInfo.uri);
     _setModifiedImage({ base64: `${BASE64_PREFIX}${originalImageBase64}`, width: imgInfo.width, height: imgInfo.height });
     console.info(`Modified Image was set to ${imgInfo.uri}`);
   };
 
   /* ******************** WebView Functions ******************** */
-  const _sendWebViewMessage = (message: OutboundMessage): void => {
-    console.log("sending", message.functionName, message.points);
-    webViewRef.current?.postMessage(JSON.stringify(message));
-  };
+  const _sendWebViewMessage = useCallback(
+    (message: OutboundMessage): void => {
+      if (webViewRef.current) {
+        console.log("sending", message.functionName, message.points);
+        webViewRef.current.postMessage(JSON.stringify(message));
+      } else {
+        console.log("WebView ref not available");
+      }
+    },
+    [webViewRef.current]
+  );
 
   const _handleInboundWebViewMessage = (data: string): void => {
-    const { loading, base64, points, functionName, error } = JSON.parse(data) as InboundMessage;
-    console.info("Receiving something");
-    if (loading) {
-      console.info(`Receiving loading message from: ${functionName}`);
-      _setIsLoading(true);
-    }
+    try {
+      const { loading, base64, points, functionName, error } = JSON.parse(data) as InboundMessage;
+      console.info("Receiving something");
+      if (loading) {
+        console.info(`Receiving loading message from: ${functionName}`);
+        _setIsLoading(true);
+      }
 
-    if (!loading && !error && base64) {
-      console.info(`Receiving data message from: ${functionName}`);
+      if (!loading && !error && base64) {
+        console.info(`Receiving data message from: ${functionName}`);
 
-      _handleModifyImage(base64);
-      _setIsLoading(false);
+        _handleModifyImage(base64);
+        _setIsLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -130,7 +137,6 @@ export const MainProvider: React.FC = ({ children }) => {
   };
 
   const _clearState = () => {
-    _setOriginalImage(null);
     _setCropPoints(null);
     _setManipulationStage(ManipulationStage.VIEW);
     _setIsLoading(false);
@@ -140,7 +146,8 @@ export const MainProvider: React.FC = ({ children }) => {
   const _handleDoneCommand = async () => {
     if (modifiedImage) {
       const imgUri = await convertFromBase64ToUri(modifiedImage.base64);
-      console.log(imgUri);
+      _setReturnImage(imgUri);
+      _clearState();
     }
   };
 
@@ -160,13 +167,20 @@ export const MainProvider: React.FC = ({ children }) => {
     }
   }, [modifiedImage]);
 
+  useLayoutEffect(() => {
+    _setCropViewDims({
+      width: windowWidth - EDITOR_VIEW_GAP * 2,
+      height: windowHeight - CONTROLS_BAR_HEIGHT * 2 - EDITOR_VIEW_GAP * 2,
+    });
+  }, [windowHeight, windowWidth]);
+
   /* ******************** JSX ******************** */
   return (
     <MainContext.Provider
       value={{
         setImage,
         cropPoints,
-        originalImage,
+        returnImage,
         manipulationStage,
         _clearState,
         modifiedImage,

@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { GestureResponderEvent, StatusBar } from "react-native";
+import { GestureResponderEvent } from "react-native";
 import Svg, { Circle, Polygon } from "react-native-svg";
 import { CONTROLS_BAR_HEIGHT, EDITOR_VIEW_GAP } from "../constants/dimensions";
 import { ManipulationStage } from "../constants/enums";

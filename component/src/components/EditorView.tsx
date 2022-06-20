@@ -9,11 +9,8 @@ export const EditorView = () => {
   /* ******************** Hooks ******************** */
   const { modifiedImage, isLoading } = useContext(MainContext);
 
-  /* ******************** Variables ******************** */
-  const imgExists = !!modifiedImage;
-
   /* ******************** JSX ******************** */
-  if (!imgExists) {
+  if (!modifiedImage) {
     return <LoadingComponent isLoading={true} />;
   }
 
