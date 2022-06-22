@@ -3,7 +3,7 @@ import WebView from "react-native-webview";
 import { FunctionName, ManipulationStage } from "../constants/enums";
 import { Points, InboundMessage, OutboundMessage, OriginalImage, ModifiedImage } from "../types";
 import * as FileSystem from "expo-file-system";
-import { convertFromBase64ToUri, convertFromUriToBase64 } from "../lib/fileUtils";
+// import { convertFromBase64ToUri, convertFromUriToBase64 } from "../lib/fileUtils";
 import { StatusBar, useWindowDimensions } from "react-native";
 import { CONTROLS_BAR_HEIGHT, EDITOR_VIEW_GAP, INITIAL_CROP_POINTS_GAP } from "../constants/dimensions";
 import { adjustPointsByRatios } from "../lib/pointsUtils";
@@ -77,8 +77,8 @@ export const MainProvider: React.FC = ({ children }) => {
 
   /* ******************** Public Functions ******************** */
   const setImage = async (imgInfo: OriginalImage) => {
-    const originalImageBase64 = await convertFromUriToBase64(imgInfo.uri);
-    _setModifiedImage({ base64: `${BASE64_PREFIX}${originalImageBase64}`, width: imgInfo.width, height: imgInfo.height });
+    // const originalImageBase64 = await convertFromUriToBase64(imgInfo.uri);
+    // _setModifiedImage({ base64: `${BASE64_PREFIX}${originalImageBase64}`, width: imgInfo.width, height: imgInfo.height });
     console.info(`Modified Image was set to ${imgInfo.uri}`);
   };
 
@@ -145,8 +145,8 @@ export const MainProvider: React.FC = ({ children }) => {
 
   const _handleDoneCommand = async () => {
     if (modifiedImage) {
-      const imgUri = await convertFromBase64ToUri(modifiedImage.base64);
-      _setReturnImage(imgUri);
+      // const imgUri = await convertFromBase64ToUri(modifiedImage.base64);
+      // _setReturnImage(imgUri);
       _clearState();
     }
   };
